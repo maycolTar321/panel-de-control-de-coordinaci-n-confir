@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportar Actividad - Equipo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #1f4068, #162447, #1a1a2e); min-height: 100vh; font-family: system-ui, sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="glass-card p-4 text-white">
+                <h2 class="mb-4">Reportar Avance / Retraso</h2>
+                <p class="text-white-50">Selecciona la actividad y detalla exactamente qué falta o qué sucedió.</p>
+
+                <div class="mb-4 p-3 rounded" style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.2);">
+                    <h5 class="text-white">¿Falta una actividad en la lista?</h5>
+                    <form id="formCrearEq" class="mt-2 d-flex gap-2">
+                        <input type="text" id="tituloEq" class="form-control bg-dark text-white border-secondary form-control-sm" placeholder="Nueva actividad..." required>
+                        <input type="date" id="fechaEq" class="form-control bg-dark text-white border-secondary form-control-sm" required style="max-width: 130px;">
+                        <button class="btn btn-success btn-sm fw-bold" type="submit" id="btnCrearEq">Crear</button>
+                    </form>
+                </div>
+
+                <form id="formReporte">
+                    <input type="hidden" id="usuario_nombre" value="Miembro del Equipo"> <!-- Se enviará el nombre directo a Sheets -->
+
+                    <div class="mb-3">
+                        <label class="form-label">Selecciona la Actividad</label>
+                        <select id="actividadSelect" class="form-select bg-dark text-white border-secondary" required>
+                            <option value="">-- Cargando actividades... --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Estado de la Actividad</label>
+                        <select id="estadoSelect" class="form-select bg-dark text-white border-secondary" required>
+                            <option value="pendiente">Sigue Pendiente</option>
+                            <option value="en_proceso">En Proceso / Trabajando en ello</option>
+                            <option value="completado">¡Listo / completado!</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Detalle Crucial (¿Por qué se detuvo o qué falta?)</label>
+                        <textarea id="detalleInput" class="form-control bg-dark text-white border-secondary" rows="5" placeholder="Escribe aquí toda la bitácora detallada..." required></textarea>
+                    </div>
+
+                    <button type="submit" id="btnReportar" class="btn btn-primary w-100 py-2 fw-bold">Enviar Reporte al Coordinador</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    await cargarSelect();
+
+    document.getElementById("formCrearEq").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btnCrearEq");
+        btn.disabled = true; btn.innerText = "...";
+        const res = await crearActividad(document.getElementById("tituloEq").value, document.getElementById("fechaEq").value);
+        if(res.success) {
+            document.getElementById("tituloEq").value = "";
+            await cargarSelect();
+            alert("Actividad creada y añadida a la lista.");
+        }
+        btn.disabled = false; btn.innerText = "Crear";
+    });
+
+    document.getElementById("formReporte").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btnReportar");
+        btn.disabled = true; btn.innerText = "Enviando...";
+        
+        const actId = document.getElementById("actividadSelect").value;
+        const usuario = document.getElementById("usuario_nombre").value;
+        const estado = document.getElementById("estadoSelect").value;
+        const detalle = document.getElementById("detalleInput").value;
+        
+        const res = await reportarAvance(actId, usuario, estado, detalle);
+        if(res.success) {
+            alert("Reporte guardado con éxito.");
+            document.getElementById("detalleInput").value = "";
+            await cargarSelect();
+        } else {
+            alert("Error al reportar.");
+        }
+        btn.disabled = false; btn.innerText = "Enviar Reporte al Coordinador";
+    });
+});
+
+async function cargarSelect() {
+    const select = document.getElementById("actividadSelect");
+    select.innerHTML = '<option value="">-- Cargando actividades... --</option>';
+    const actividades = await fetchActividades();
+    
+    select.innerHTML = '<option value="">-- Seleccionar tarea --</option>';
+    actividades.forEach(act => {
+        if(act.estado !== 'completado') {
+            const opt = document.createElement("option");
+            opt.value = act.id;
+            opt.innerText = act.titulo;
+            select.appendChild(opt);
+        }
+    });
+}
+</script>
+</body>
+</html>
