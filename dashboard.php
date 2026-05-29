@@ -22,7 +22,17 @@ $actividades = $stmt->fetchAll();
 <div class="container mt-5">
     <div class="glass-card p-4 p-md-5">
         <h1 class="mb-4 text-white">Estado del Proyecto <span class="badge bg-primary fs-6">Coordinador</span></h1>
-        <p class="text-white-50">Haz clic en cualquier actividad para ver por qué está retrasada o qué falta exactamente.</p>
+        <p class="text-white-50">Escribe las nuevas actividades para el equipo. Aparecerán aquí abajo como un checklist.</p>
+        
+        <!-- Formulario para agregar actividades -->
+        <form action="api/crear_actividad.php" method="POST" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="titulo" class="form-control bg-dark text-white border-secondary" placeholder="Escribe una nueva actividad..." required>
+                <input type="date" name="fecha_limite" class="form-control bg-dark text-white border-secondary" required style="max-width: 150px;">
+                <button class="btn btn-success fw-bold" type="submit">Añadir Tarea</button>
+            </div>
+        </form>
+
         <div class="list-group mt-4">
             <?php foreach ($actividades as $act): ?>
                 <div class="list-group-item list-group-item-action glass-item d-flex justify-content-between align-items-center text-white mb-2" style="cursor:pointer;" onclick="verDetalle(<?php echo $act['id']; ?>, '<?php echo htmlspecialchars($act['titulo']); ?>')">

@@ -25,6 +25,15 @@ $actividades = $stmt->fetchAll();
                 <h2 class="mb-4">Reportar Avance / Retraso</h2>
                 <p class="text-white-50">Selecciona la actividad y detalla exactamente qué falta o qué sucedió.</p>
 
+                <div class="mb-4 p-3 rounded" style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.2);">
+                    <h5 class="text-white">¿Falta una actividad en la lista?</h5>
+                    <form action="api/crear_actividad.php" method="POST" class="mt-2 d-flex gap-2">
+                        <input type="text" name="titulo" class="form-control bg-dark text-white border-secondary form-control-sm" placeholder="Nueva actividad..." required>
+                        <input type="date" name="fecha_limite" class="form-control bg-dark text-white border-secondary form-control-sm" required style="max-width: 130px;">
+                        <button class="btn btn-success btn-sm fw-bold" type="submit">Crear</button>
+                    </form>
+                </div>
+
                 <form action="guardar_reporte.php" method="POST">
                     <input type="hidden" name="usuario_id" value="2">
 
